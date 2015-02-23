@@ -7,7 +7,8 @@ from resources.lib.parser import get_categories, get_movie_list, get_playlist, g
 plugin = Plugin()
 # TODO: change languages
 lang = 'ru'
-_addon_id = int(sys.argv[1])
+_addon_id = plugin.id()
+#_addon_id = int(sys.argv[1])
 addon_path = plugin.addon.getAddonInfo('path').decode('utf-8')
 sys.path.append(os.path.join(addon_path, 'resources', 'lib'))
 #@plugin.route('/')
@@ -103,6 +104,8 @@ def show_search_list_in(category, category_name, page, original_id, start_search
                            'path' : plugin.url_for('start_search_in', category= category, original_id = original_id,
                                                    category_name = category_name)})
     xbmcplugin.setContent(_addon_id, 'movies')
+    xbmc.executebuiltin('Container.SetViewMode(504)')
+#    plugin.set_view_mode(504) #TODO: check as alternative to above
 #    return plugin.finish(movies_list, view_mode=504) #, update_listing=True)
     return movies_list
 
