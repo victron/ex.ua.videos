@@ -10,7 +10,8 @@ lang = 'ru'
 _addon_id = int(sys.argv[1])
 addon_path = plugin.addon.getAddonInfo('path').decode('utf-8')
 sys.path.append(os.path.join(addon_path, 'resources', 'lib'))
-@plugin.route('/')
+#@plugin.route('/')
+@plugin.cached_route('/')
 def show_categories():
     categories = get_categories(lang)
 
@@ -26,10 +27,12 @@ def show_categories():
                            'path' : plugin.url_for('start_search_in', category= 'everywhere', original_id = '0',
                                                    category_name = 'search everywhere')})
 
-    return plugin.finish(categories_list) #, sort_methods=['label_ignore_the']) #, sort_methods=['label']) #, view_mode=500))
+#    return plugin.finish(categories_list) #, sort_methods=['label_ignore_the']) #, sort_methods=['label']) #, view_mode=500))
+    return categories_list
 
 
-@plugin.route('/movies_list/<category>/category_name/<category_name>/page/<page>')
+@plugin.cached_route('/movies_list/<category>/category_name/<category_name>/page/<page>')
+#@plugin.route('/movies_list/<category>/category_name/<category_name>/page/<page>')
 def show_movies(category, category_name, page):
     page = int(page)
     movies, next_page, original_id = get_movie_list(category, page)
@@ -55,13 +58,14 @@ def show_movies(category, category_name, page):
                            'path' : plugin.url_for('start_search_in', category= category, original_id = original_id,
                                                    category_name = category_name)})
     xbmcplugin.setContent(_addon_id, 'movies')
-    return plugin.finish(movies_list, view_mode=504) #, update_listing=True)
+    xbmc.executebuiltin('Container.SetViewMode(504)')
+#    return plugin.finish(movies_list, view_mode=504) #, update_listing=True)
+    return movies_list
 
 
-
-@plugin.route('/movies_list/<category>/category_name/<category_name>/page/<page>/original_id/<original_id>',
+@plugin.cached_route('/movies_list/<category>/category_name/<category_name>/page/<page>/original_id/<original_id>',
               name = 'start_search_in', options = {'start_search' : True, 'page' : '0'})
-@plugin.route('/movies_list/<category>/category_name/<category_name>/page/<page>/original_id/<original_id>/search_request/<search_request>')
+@plugin.cached_route('/movies_list/<category>/category_name/<category_name>/page/<page>/original_id/<original_id>/search_request/<search_request>')
 def show_search_list_in(category, category_name, page, original_id, start_search = False, search_request = ''):
     page = int(page)
     if start_search and len(search_request) == 0:
@@ -99,7 +103,8 @@ def show_search_list_in(category, category_name, page, original_id, start_search
                            'path' : plugin.url_for('start_search_in', category= category, original_id = original_id,
                                                    category_name = category_name)})
     xbmcplugin.setContent(_addon_id, 'movies')
-    return plugin.finish(movies_list, view_mode=504) #, update_listing=True)
+#    return plugin.finish(movies_list, view_mode=504) #, update_listing=True)
+    return movies_list
 
 
 @plugin.route('/files/<movie>/thumbnail/<thumbnail_link>/category_name/<category_name>')
