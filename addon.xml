@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.ex.ua.videos" name="EX.UA videos" version="0.1.2" provider-name="Viktor Tsymbalyuk">
+<addon id="plugin.video.ex.ua.videos" name="EX.UA videos" version="0.1.3" provider-name="Viktor Tsymbalyuk">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
     <import addon="script.module.xbmcswift2" version="2.4.0"/>
@@ -16,7 +16,7 @@
     <description lang="en">Addon for watchin movies on "EX.UA". Resource available only in Ukraine.</description>
     <description lang="uk">Плагін для перегляду відео з "EX.UA". Ресурс доступний тільки на тереторії України.</description>
     <email>viktor.tsymbalyuk at gmail dot com</email>
-    <source>https://github.com/victron/ex.ua.videos</source>
+    <source>https://github.com/victron/plugin.video.ex.ua.videos.git</source>
     <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
     </extension>
 </addon>
