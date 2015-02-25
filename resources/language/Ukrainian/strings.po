@@ -1,0 +1,78 @@
+# {{subst:Name}} Media Center language file
+# Addon Name: EX.UA videos
+# Addon id: plugin.video.ex.ua.videos
+# Addon Provider: Viktor Tsymbalyuk
+msgid ""
+msgstr ""
+"Project-Id-Version: {{subst:Name}} Addons\n"
+"Report-Msgid-Bugs-To: viktor.tsymbalyuk@gmail.com\n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: {{subst:Name}} Translation Team\n"
+"Language-Team: English (http://www.transifex.com/projects/p/xbmc-addons/language/en/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: uk\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "#30001"
+msgid "main category"
+msgstr "загальна категорія"
+
+msgctxt "#30002"
+msgid "resources language"
+msgstr "мова ресурсу"
+
+msgctxt "#30003"
+msgid "Cache"
+msgstr "Кеш"
+
+msgctxt "#30004"
+msgid "Cache life time (hours)"
+msgstr "Термін життя кешу (годин)"
+
+msgctxt "#30005"
+msgid "Pages to preload"
+msgstr "Кількість сторінок для попереднього завантаження"
+
+msgctxt "#30006"
+msgid "Cache settings"
+msgstr "Кеш налаштування"
+
+msgctxt "#30007"
+msgid "Ukrainian"
+msgstr "українська"
+
+msgctxt "#30008"
+msgid "English"
+msgstr "англійська"
+
+msgctxt "#30009"
+msgid "Russian"
+msgstr "російська"
+
+msgctxt "#30010"
+msgid "Interface language"
+msgstr ""
+
+
+msgctxt "#30021"
+msgid "Search in"
+msgstr "Пошук в"
+
+msgctxt "#30022"
+msgid "Search everywhere"
+msgstr "Пошук усюди"
+
+msgctxt "#30023"
+msgid "New search in"
+msgstr "Новий пошук в"
+
+msgctxt "#30024"
+msgid "Next Page"
+msgstr "Наступна сторінка"
+
+msgctxt "#30025"
+msgid "Previous Page"
+msgstr "Попередня сторінка"

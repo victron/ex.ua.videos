@@ -5,14 +5,28 @@ import urllib, bs4, os, sys
 from resources.lib.parser import get_categories, get_movie_list, get_playlist, get_movie_info, get_search_list
 
 plugin = Plugin()
-# TODO: change languages
-lang = 'ru'
-_addon_id = plugin.id()
-#_addon_id = int(sys.argv[1])
+# settings
+lang = plugin.get_setting('resources_language', int)
+cache_flag = plugin.get_setting('cache_on_flag', bool)
+cache_ttl = plugin.get_setting('cache_TTL', int) * 60
+_addon_id = int(sys.argv[1])
 addon_path = plugin.addon.getAddonInfo('path').decode('utf-8')
 sys.path.append(os.path.join(addon_path, 'resources', 'lib'))
-#@plugin.route('/')
-@plugin.cached_route('/')
+
+# localization
+import xbmcaddon
+addon = xbmcaddon.Addon()
+next_page_str = addon.getLocalizedString(30024)
+previous_page = addon.getLocalizedString(30025)
+search_in = addon.getLocalizedString(30021)
+search_everywhere = addon.getLocalizedString(30022)
+new_search_in = addon.getLocalizedString(30023)
+get_movie_info_api = lambda cache_flag, link : get_movie_info_cached(link) if cache_flag else get_movie_info(link)
+
+LANGUAGES= ('uk', 'en', 'ru')
+lang = LANGUAGES[lang]
+
+@plugin.route('/')
 def show_categories():
     categories = get_categories(lang)
 
@@ -24,49 +38,47 @@ def show_categories():
                        # TODO: show first page, via multiple route
                        for category, link in categories ]
 #    plugin.add_sort_method('label')
-    categories_list.insert(0, {'label': 'Search everywhere [.....]',
+    categories_list.insert(0, {'label': search_everywhere + ' [.....]',
                            'path' : plugin.url_for('start_search_in', category= 'everywhere', original_id = '0',
                                                    category_name = 'search everywhere')})
 
-#    return plugin.finish(categories_list) #, sort_methods=['label_ignore_the']) #, sort_methods=['label']) #, view_mode=500))
-    return categories_list
+    return plugin.finish(categories_list)
 
 
-@plugin.cached_route('/movies_list/<category>/category_name/<category_name>/page/<page>')
-#@plugin.route('/movies_list/<category>/category_name/<category_name>/page/<page>')
+@plugin.route('/movies_list/<category>/category_name/<category_name>/page/<page>')
 def show_movies(category, category_name, page):
     page = int(page)
     movies, next_page, original_id = get_movie_list(category, page)
     movies_list = [{'label':movie_title,
                     'thumbnail': thumbnail,
-                    'info': get_movie_info(link),
+                    'info': get_movie_info_api(cache_flag, link),
                     'properties': {'fanart_image': thumbnail},
                     'path': plugin.url_for('show_files_list', movie=link,
                                            thumbnail_link = thumbnail, category_name = category_name)}
                    for thumbnail, movie_title, link in movies ]
     list_len = len(movies_list)
     if next_page:
-        movies_list.insert(list_len, {'label': 'Next >>',
+        movies_list.insert(list_len, {'label': next_page_str + ' >>',
                                       'path': plugin.url_for('show_movies', category= category, page=str(page + 1),
                                       category_name = category_name)})
     if page > 0:
-        movies_list.insert(-1, {'label': '<< Previous',
-                                      'path': plugin.url_for('show_movies', category= category, page=str(page - 1),
-                                      category_name = category_name)})
-
-
-    movies_list.insert(0, {'label': 'Search in '+ urllib.unquote_plus(category_name).decode('utf-8') + ' [.....]',
+        movies_list.insert(-1, {'label': '<< ' + previous_page,
+                                        'path': plugin.url_for('back')})
+    movies_list.insert(0, {'label': search_in + ' '+ urllib.unquote_plus(category_name).decode('utf-8') + ' [.....]',
                            'path' : plugin.url_for('start_search_in', category= category, original_id = original_id,
                                                    category_name = category_name)})
     xbmcplugin.setContent(_addon_id, 'movies')
-    xbmc.executebuiltin('Container.SetViewMode(504)')
-#    return plugin.finish(movies_list, view_mode=504) #, update_listing=True)
-    return movies_list
+    return plugin.finish(movies_list, view_mode=504)
 
 
-@plugin.cached_route('/movies_list/<category>/category_name/<category_name>/page/<page>/original_id/<original_id>',
+@plugin.route('/back', name = 'back')
+# call "back"
+def previous_view():
+    return xbmc.executebuiltin('Action("back")')
+
+@plugin.route('/movies_list/<category>/category_name/<category_name>/page/<page>/original_id/<original_id>',
               name = 'start_search_in', options = {'start_search' : True, 'page' : '0'})
-@plugin.cached_route('/movies_list/<category>/category_name/<category_name>/page/<page>/original_id/<original_id>/search_request/<search_request>')
+@plugin.route('/movies_list/<category>/category_name/<category_name>/page/<page>/original_id/<original_id>/search_request/<search_request>')
 def show_search_list_in(category, category_name, page, original_id, start_search = False, search_request = ''):
     page = int(page)
     if start_search and len(search_request) == 0:
@@ -74,46 +86,38 @@ def show_search_list_in(category, category_name, page, original_id, start_search
         if search_request is not None:
             movies, next_page = get_search_list(original_id, search_request, page)
         else:
-            # return back window, in history
             return
-#            xbmc.executebuiltin('PreviousWindow()')
     else:
         search_request = urllib.unquote_plus(search_request)
         movies, next_page = get_search_list(original_id, search_request, page)
     movies_list = [{'label':movie_title,
                     'thumbnail': thumbnail,
-                    'info': get_movie_info(link),
+                    'info': get_movie_info_api(cache_flag, link),
                     'properties': {'fanart_image': thumbnail},
                     'path': plugin.url_for('show_files_list', movie=link,
                                            thumbnail_link = thumbnail, category_name = category_name)}
                    for thumbnail, movie_title, link in movies ]
     list_len = len(movies_list)
     if next_page:
-        movies_list.insert(list_len, {'label': 'Next >>',
+        movies_list.insert(list_len, {'label': next_page_str + ' >>',
                                       'path': plugin.url_for('show_search_list_in', category= category, page=str(page + 1),
                                       category_name = category_name, original_id = original_id,
                                       search_request = urllib.quote_plus(search_request))})
     if page > 0:
-        movies_list.insert(-1, {'label': '<< Previous',
-                                      'path': plugin.url_for('show_search_list_in', category= category, page=str(page - 1),
-                                      category_name = category_name, original_id = original_id,
-                                      search_request = urllib.quote_plus(search_request))})
+        movies_list.insert(-1, {'label': '<< ' + previous_page,
+                                        'path': plugin.url_for('back')})
 
 
-    movies_list.insert(0, {'label': 'New search in '+ urllib.unquote_plus(category_name).decode('utf-8') + ' [.....]',
+    movies_list.insert(0, {'label': new_search_in + ' '+ urllib.unquote_plus(category_name).decode('utf-8') + ' [.....]',
                            'path' : plugin.url_for('start_search_in', category= category, original_id = original_id,
                                                    category_name = category_name)})
     xbmcplugin.setContent(_addon_id, 'movies')
-    xbmc.executebuiltin('Container.SetViewMode(504)')
-#    plugin.set_view_mode(504) #TODO: check as alternative to above
-#    return plugin.finish(movies_list, view_mode=504) #, update_listing=True)
-    return movies_list
+    return plugin.finish(movies_list, view_mode=504) #, update_listing=True)
 
 
 @plugin.route('/files/<movie>/thumbnail/<thumbnail_link>/category_name/<category_name>')
 def show_files_list(movie, thumbnail_link, category_name):
     files = get_playlist(movie)
-#    thumbnail = files[0]
     files_list = [{'label': file_title,
                    'thumbnail': thumbnail_link,
                    'properties': {'fanart_image': thumbnail_link},
@@ -127,10 +131,14 @@ def show_files_list(movie, thumbnail_link, category_name):
         player.play(currentPlaylist)
     else:
         xbmc.executebuiltin("ActivateWindow(VideoPlaylist)")
-#    xbmcplugin.setContent(_addon_id, 'movies')
-#    return files_list
-#    return plugin.finish(files_list, sort_methods=['label'], view_mode=504)
 
+#===========================
+
+@plugin.cached(cache_ttl)
+def get_movie_info_cached(link):
+    # transit function for plugin.cached decorator
+    data = get_movie_info(link)
+    return data
 
 if __name__ == '__main__':
     plugin.run()

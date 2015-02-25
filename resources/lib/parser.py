@@ -1,27 +1,14 @@
 # -*- coding: utf-8 -*-
 __author__ = 'vic'
 
-import urllib, urllib2, re, requests
+import re, requests
 from regex_collection import movie_info
 from bs4 import BeautifulSoup
 # get web page source
-def GetHTML2(url):
-    headers = {'User-Agent':'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3', 'Content-Type':'application/x-www-form-urlencoded'}
-#    conn = urllib2.urlopen(urllib2.Request(url, urllib.urlencode({}), headers))
-    conn = urllib.urlopen(url)
-    html = conn.read()
-    conn.close()
-    return html
-
-
 def GetHTML(url):
     headers = {'User-Agent':'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) '
                             'Gecko/2008092417 Firefox/3.0.3',
                'Content-Type':'application/x-www-form-urlencoded'}
-#    home_page = 'http://www.ex.ua/'
-#    r = requests.get(home_page, headers=headers)
-#    ccid = r.cookies.get_dict()
-#    r = requests.get(url, headers=headers, cookies=ccid)
     r = requests.get(url)
     return r.text
 
@@ -43,6 +30,7 @@ def get_movie_list(category, page):
     soup = BeautifulSoup(html)
     original_id = soup.find(attrs={"name": "original_id"})["value"] # category id
     return re.compile('<img src=\'(.+?)\?.*?alt=\'(.+?)\'></a><p><a href=\'(.+?)\'>').findall(html), next_page_flag, original_id
+
 
 def get_search_list(original_id, search_request, page):
     """
@@ -80,28 +68,3 @@ def get_movie_info(link):
     html = GetHTML('http://www.ex.ua' + link)
     return movie_info(html)
 
-
-
-########
-"""
-for title, link in get_categories():
-    print(u'{0} [{1}]'.format(title, link)) #unicode print
-#    print(title + ' [' + link + ']')
-
-for thumbnail, movie_title, link in get_movie_list('/82470?r=80934'):
-    print(u'{0} [{1}] [{2}]'.format(movie_title, link, thumbnail))
-
-#html = GetHTML('http://www.ex.ua' + '/85726671?r=82476')
-
-print get_files_list('/85726671?r=82476')
-"""
-"""
-html = GetHTML('http://www.ex.ua' + '/playlist/85726671.xspf')
-print html
-files_list = re.compile('\t<title>(.+?)</title>\n\t<location>(.+?)</location>').findall(html.decode('utf-8'))
-print files_list
-"""
-
-
-html = GetHTML('http://www.ex.ua' + '/85726671?r=82476')
-print movie_info(html)
