@@ -23,6 +23,7 @@ from xbmcswift2 import Plugin
 import urllib, bs4, os, sys, xbmc, xbmcplugin
 from resources.lib.parser import get_categories, get_movie_list, get_playlist, get_movie_info, get_search_list
 
+
 plugin = Plugin()
 # settings
 lang = plugin.get_setting('resources_language', int)
@@ -30,7 +31,7 @@ cache_flag = plugin.get_setting('cache_on_flag', bool)
 cache_ttl = plugin.get_setting('cache_TTL', int) * 60
 _addon_id = int(sys.argv[1])
 addon_path = plugin.addon.getAddonInfo('path').decode('utf-8')
-sys.path.append(os.path.join(addon_path, 'resources', 'lib'))
+#sys.path.append(os.path.join(addon_path, 'resources', 'lib'))
 
 # localization
 import xbmcaddon

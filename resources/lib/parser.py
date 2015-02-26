@@ -63,10 +63,6 @@ def get_playlist(movie):
     return re.compile('\t<title>(.+?)</title>\n\t<location>(.+?)</location>').findall(html)
 
 
-def get_movie_info(link):
-    html = GetHTML('http://www.ex.ua' + link)
-    return movie_info(html)
-
 DETAILS_ukr_ru = {
             'year': (u'([Гг]од|[Рр]ік).*', u'(.*?([0-9]{4}))', '([0-9]{4})'),
             'genre': (u'[Жж]анр.*', u'.*?: *?(.*)', '.+'),
@@ -76,7 +72,9 @@ DETAILS_ukr_ru = {
             'cast': (u'[ВвУу] ролях.*', u'.*?: *?(.*)', '.+')
                 }
 
-def movie_info(html_page):
+
+def get_movie_info(link):
+    html_page = GetHTML('http://www.ex.ua' + link)
     kodi_details = {}
     soup = BeautifulSoup(html_page)
     for detail in DETAILS_ukr_ru:
