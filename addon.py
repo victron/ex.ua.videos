@@ -1,7 +1,26 @@
 # -*- coding: utf-8 -*-
+'''
+    Ex.Ua.videos plugin for KODI (XBMC)
+    Copyright (C) 2015 Viktor Tsymbalyuk
+	viktor.tsymbalyuk@gmail.com
+    This file is part of plugin .
 
-from xbmcswift2 import Plugin, xbmc, xbmcplugin
-import urllib, bs4, os, sys
+    Ex.Ua.videos is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Ex.Ua.videos is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Ex.Ua.videos.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
+from xbmcswift2 import Plugin
+import urllib, bs4, os, sys, xbmc, xbmcplugin
 from resources.lib.parser import get_categories, get_movie_list, get_playlist, get_movie_info, get_search_list
 
 plugin = Plugin()
@@ -24,7 +43,16 @@ new_search_in = addon.getLocalizedString(30023)
 get_movie_info_api = lambda cache_flag, link : get_movie_info_cached(link) if cache_flag else get_movie_info(link)
 
 LANGUAGES= ('uk', 'en', 'ru')
+print('<lang> = {0}'.format(lang))
+plugin.log.debug('Debug message')
 lang = LANGUAGES[lang]
+
+xbmc.executebuiltin('Skin.SetBool(AutoScroll)')
+"""
+msgctxt "#20189"
+msgid "Enable auto scrolling for plot & review"
+settings maping in /usr/share/kodi/addons/skin.confluence/720p/SkinSettings.xml
+"""
 
 @plugin.route('/')
 def show_categories():
