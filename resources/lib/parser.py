@@ -3,6 +3,7 @@ __author__ = 'vic'
 
 import re, requests
 from bs4 import BeautifulSoup
+import xbmc
 # get web page source
 def GetHTML(url):
     headers = {'User-Agent':'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) '
@@ -75,6 +76,7 @@ DETAILS_ukr_ru = {
 
 def get_movie_info(link):
     html_page = GetHTML('http://www.ex.ua' + link)
+    xbmc.log(msg='[ex.ua.videos]' + 'GetHTM request =>>> ' + str(link), level=xbmc.LOGDEBUG)
     kodi_details = {}
     soup = BeautifulSoup(html_page)
     for detail in DETAILS_ukr_ru:
@@ -100,5 +102,6 @@ def get_movie_info(link):
 #                kodi_details[detail] = int(text)
             else:
                 kodi_details[detail] = text
+    xbmc.log(msg='[ex.ua.videos]' + '<kodi_details> =' + str(kodi_details), level=xbmc.LOGDEBUG)
     return kodi_details
 
