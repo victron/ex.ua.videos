@@ -21,8 +21,10 @@
 
 from xbmcswift2 import Plugin
 import urllib, bs4, os, sys, xbmc, xbmcplugin
-from resources.lib.parser import get_categories, get_movie_list, get_playlist, get_movie_info, get_search_list
+#from resources.lib.parser import get_categories, get_movie_list, get_playlist, get_movie_info, get_search_list
+from resources.lib.parser import *
 
+xbmc.log(msg='[ex.ua.videos]' + '----- start ----', level=xbmc.LOGDEBUG)
 
 plugin = Plugin()
 # settings
@@ -32,6 +34,9 @@ cache_ttl = plugin.get_setting('cache_TTL', int) * 60
 _addon_id = int(sys.argv[1])
 addon_path = plugin.addon.getAddonInfo('path').decode('utf-8')
 #sys.path.append(os.path.join(addon_path, 'resources', 'lib'))
+
+
+
 
 # localization
 import xbmcaddon
@@ -44,8 +49,6 @@ new_search_in = addon.getLocalizedString(30023)
 get_movie_info_api = lambda cache_flag, link : get_movie_info_cached(link) if cache_flag else get_movie_info(link)
 
 LANGUAGES= ('uk', 'en', 'ru')
-print('<lang> = {0}'.format(lang))
-plugin.log.debug('Debug message')
 lang = LANGUAGES[lang]
 
 xbmc.executebuiltin('Skin.SetBool(AutoScroll)')
@@ -85,6 +88,7 @@ def show_movies(category, category_name, page):
                     'path': plugin.url_for('show_files_list', movie=link,
                                            thumbnail_link = thumbnail, category_name = category_name)}
                    for thumbnail, movie_title, link in movies ]
+    xbmc.log(msg='[ex.ua.videos]' + '<movies_list> = ' + str(movies_list), level=xbmc.LOGDEBUG)
     list_len = len(movies_list)
     if next_page:
         movies_list.insert(list_len, {'label': next_page_str + ' >>',
