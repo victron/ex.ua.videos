@@ -76,9 +76,12 @@ DETAILS_ukr_ru = {
 
 def get_movie_info(link):
     html_page = GetHTML('http://www.ex.ua' + link)
-    xbmc.log(msg='[ex.ua.videos]' + 'GetHTM request =>>> ' + str(link), level=xbmc.LOGDEBUG)
+#    xbmc.log(msg='[ex.ua.videos]' + 'GetHTM request =>>> ' + str(link), level=xbmc.LOGDEBUG)
     kodi_details = {}
     soup = BeautifulSoup(html_page)
+    kodi_details['label'] = soup.head.find(name='meta', attrs={'name':"title"}).get('content')
+    kodi_details['thumbnail'] = re.findall('(.+?)\?.*',
+                                           soup.head.find(name='link', attrs={'rel':"image_src"}).get('href'))[0]
     for detail in DETAILS_ukr_ru:
         search_detail = soup.find(text=re.compile(DETAILS_ukr_ru[detail][0], re.UNICODE))
         if search_detail is not None:
@@ -102,6 +105,6 @@ def get_movie_info(link):
 #                kodi_details[detail] = int(text)
             else:
                 kodi_details[detail] = text
-    xbmc.log(msg='[ex.ua.videos]' + '<kodi_details> =' + str(kodi_details), level=xbmc.LOGDEBUG)
+#    xbmc.log(msg='[ex.ua.videos]' + '<kodi_details> =' + str(kodi_details), level=xbmc.LOGDEBUG)
     return kodi_details
 
