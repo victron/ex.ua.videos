@@ -29,7 +29,8 @@ def get_movie_list(category, page):
     next_page_flag = True
     soup = BeautifulSoup(html)
     original_id = soup.find(attrs={"name": "original_id"})["value"] # category id
-    return re.compile('<img src=\'(.+?)\?.*?alt=\'(.+?)\'></a><p><a href=\'(.+?)\'>').findall(html), next_page_flag, original_id
+    #return re.compile('<img src=\'(.+?)\?.*?alt=\'(.+?)\'></a><p><a href=\'(.+?)\'>').findall(html), next_page_flag, original_id
+    return re.compile('</a><p><a href=\'(.+?)\'>').findall(html), next_page_flag, original_id
 
 
 def get_search_list(original_id, search_request, page):
@@ -79,8 +80,8 @@ def get_movie_info(link):
 #    xbmc.log(msg='[ex.ua.videos]' + 'GetHTM request =>>> ' + str(link), level=xbmc.LOGDEBUG)
     kodi_details = {}
     soup = BeautifulSoup(html_page)
-    kodi_details['label'] = soup.head.find(name='meta', attrs={'name':"title"}).get('content')
-    kodi_details['thumbnail'] = re.findall('(.+?)\?.*',
+    kodi_details['title'] = soup.head.find(name='meta', attrs={'name':"title"}).get('content')
+    kodi_details['trailer'] = re.findall('(.+?)\?.*',
                                            soup.head.find(name='link', attrs={'rel':"image_src"}).get('href'))[0]
     for detail in DETAILS_ukr_ru:
         search_detail = soup.find(text=re.compile(DETAILS_ukr_ru[detail][0], re.UNICODE))

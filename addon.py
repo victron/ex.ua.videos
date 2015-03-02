@@ -81,13 +81,14 @@ def show_categories():
 def show_movies(category, category_name, page):
     page = int(page)
     movies, next_page, original_id = get_movie_list(category, page)
-    movies_list = [{'label':movie_title,
-                    'thumbnail': thumbnail,
-                    'info': get_movie_info_api(cache_flag, link),
-                    'properties': {'fanart_image': thumbnail},
-                    'path': plugin.url_for('show_files_list', movie=link,
-                                           thumbnail_link = thumbnail, category_name = category_name)}
-                   for thumbnail, movie_title, link in movies ]
+    movies_info = [get_movie_info_api(cache_flag, link) for link in movies]
+    movies_list = [{'label': movies_info[i].get('title'),
+                    'thumbnail': movies_info[i].get('trailer'),
+                    'info': movies_info[i],
+                    'properties': {'fanart_image': movies_info[i].get('trailer')},
+                    'path': plugin.url_for('show_files_list', movie=movies[i],
+                                           thumbnail_link = movies_info[i].get('trailer'), category_name = category_name)}
+                   for i in range(len(movies)) ]
     xbmc.log(msg='[ex.ua.videos]' + '<movies_list> = ' + str(movies_list), level=xbmc.LOGDEBUG)
     list_len = len(movies_list)
     if next_page:
