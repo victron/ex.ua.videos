@@ -3,21 +3,47 @@ __author__ = 'vic'
 
 import re, requests
 from bs4 import BeautifulSoup
-import xbmc
+import xbmc, xbmcgui
+from addon import connect_timeout, read_timeout, max_retries
 # get web page source
+dialog = xbmcgui.Dialog()
+
 def GetHTML(url):
     headers = {'User-Agent':'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) '
                             'Gecko/2008092417 Firefox/3.0.3',
                'Content-Type':'application/x-www-form-urlencoded'}
-    r = requests.get(url)
-    return r.text
+    session = requests.Session()
+    session.mount("http://", requests.adapters.HTTPAdapter(max_retries=max_retries))
+#    connect_timeout = 2.0011
+#    read_timeout = 1.0
+    try:
+        response = session.get(url= url, timeout=(connect_timeout, read_timeout))
+        #response = requests.get(url, timeout=(connect_timeout, read_timeout))
+    except requests.exceptions.ConnectTimeout as e:
+        xbmc.log(msg='[ex.ua.videos]' + 'Too slow connection', level=xbmc.LOGWARNING)
+        return dialog.notification('connection problem', 'Too slow connection', xbmcgui.NOTIFICATION_WARNING, 5000, True)
+    except requests.exceptions.ReadTimeout as e:
+        xbmc.log(msg='[ex.ua.videos]' + 'Waited too long between bytes.', level=xbmc.LOGERROR)
+        return dialog.notification('connection problem', 'Waited too long between bytes', xbmcgui.NOTIFICATION_WARNING, 5000, True)
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        xbmc.log(msg='[ex.ua.videos]' + 'get an HTTPError: ' + e.message, level=xbmc.LOGERROR)
+        return dialog.notification('connection problem', 'HTTPError: ' + e.message, xbmcgui.NOTIFICATION_WARNING, 5000, True)
+#    response = requests.get(url)
+    return response.text
 
 def get_categories(lang='uk'):
     """return [(category, link), (.., ..)]"""
     html = GetHTML('http://www.ex.ua/' + lang + '/video')
     #<a href='/82470?r=80934'><b>Закордонне кіно</b></a><p><a href='/82470?r=80934' class=info>
     #<b>Закордонне кіно</b></a><p><a href='/82470?r=80934' class=info>
-    return re.compile('<b>(.+?)</b></a><p><a href=\'(.+?)\' class=info>').findall(html) #.decode('utf-8'))
+    result_list = re.compile('<b>(.+?)</b></a><p><a href=\'(.+?)\' class=info>').findall(html) #.decode('utf-8'))
+    if result_list:
+        return result_list
+    else:
+        xbmc.log(msg='[ex.ua.videos]' + 'not expected output', level=xbmc.LOGWARNING)
+        return dialog.notification('Server output', 'not expected output', xbmcgui.NOTIFICATION_WARNING, 5000, True)
 
 
 def get_movie_list(category, page):

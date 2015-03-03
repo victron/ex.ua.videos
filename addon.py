@@ -21,6 +21,7 @@
 
 from xbmcswift2 import Plugin
 import urllib, bs4, os, sys, xbmc, xbmcplugin
+from multiprocessing import Pool
 #from resources.lib.parser import get_categories, get_movie_list, get_playlist, get_movie_info, get_search_list
 from resources.lib.parser import *
 
@@ -31,11 +32,13 @@ plugin = Plugin()
 lang = plugin.get_setting('resources_language', int)
 cache_flag = plugin.get_setting('cache_on_flag', bool)
 cache_ttl = plugin.get_setting('cache_TTL', int) * 60
+connect_timeout = float(plugin.get_setting('connect_timeout'))
+read_timeout = float(plugin.get_setting('read_timeout'))
+max_retries = plugin.get_setting('max_retries', int)
+
 _addon_id = int(sys.argv[1])
 addon_path = plugin.addon.getAddonInfo('path').decode('utf-8')
 #sys.path.append(os.path.join(addon_path, 'resources', 'lib'))
-
-
 
 
 # localization
@@ -46,6 +49,7 @@ previous_page = addon.getLocalizedString(30025)
 search_in = addon.getLocalizedString(30021)
 search_everywhere = addon.getLocalizedString(30022)
 new_search_in = addon.getLocalizedString(30023)
+
 get_movie_info_api = lambda cache_flag, link : get_movie_info_cached(link) if cache_flag else get_movie_info(link)
 
 LANGUAGES= ('uk', 'en', 'ru')
@@ -61,7 +65,8 @@ settings maping in /usr/share/kodi/addons/skin.confluence/720p/SkinSettings.xml
 @plugin.route('/')
 def show_categories():
     categories = get_categories(lang)
-
+    if categories is None:
+        return
     categories_list = [{'label':category,
                         'path': plugin.url_for('show_movies', category=link,
                                                # encode category_name into url code
@@ -81,7 +86,10 @@ def show_categories():
 def show_movies(category, category_name, page):
     page = int(page)
     movies, next_page, original_id = get_movie_list(category, page)
-    movies_info = [get_movie_info_api(cache_flag, link) for link in movies]
+    #movies_info = [get_movie_info_api(cache_flag, link) for link in movies]
+    #Parallel Processing
+    pool = Pool(4)
+    movies_info = pool.map(lambda link: get_movie_info_api(cache_flag, link), movies)
     movies_list = [{'label': movies_info[i].get('title'),
                     'thumbnail': movies_info[i].get('trailer'),
                     'info': movies_info[i],

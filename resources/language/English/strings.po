@@ -75,3 +75,23 @@ msgstr ""
 msgctxt "#30025"
 msgid "Previous Page"
 msgstr ""
+
+msgctxt "#32001"
+msgid "General"
+msgstr ""
+
+msgctxt "#32020"
+msgid "Connection"
+msgstr ""
+
+msgctxt "#32021"
+msgid "Connection timeout"
+msgstr ""
+
+msgctxt "#32022"
+msgid "Read timeout"
+msgstr ""
+
+msgctxt "#32023"
+msgid "Max retries"
+msgstr ""
