@@ -86,10 +86,10 @@ def show_categories():
 def show_movies(category, category_name, page):
     page = int(page)
     movies, next_page, original_id = get_movie_list(category, page)
-    #movies_info = [get_movie_info_api(cache_flag, link) for link in movies]
+    movies_info = [get_movie_info_api(cache_flag, link) for link in movies]
     #Parallel Processing
-    pool = Pool(4)
-    movies_info = pool.map(lambda link: get_movie_info_api(cache_flag, link), movies)
+    #pool = Pool(4)
+    #movies_info = pool.map(lambda link: get_movie_info_api(cache_flag, link), movies)
     movies_list = [{'label': movies_info[i].get('title'),
                     'thumbnail': movies_info[i].get('trailer'),
                     'info': movies_info[i],
