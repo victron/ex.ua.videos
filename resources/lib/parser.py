@@ -103,12 +103,15 @@ DETAILS_ukr_ru = {
 
 def get_movie_info(link):
     html_page = GetHTML('http://www.ex.ua' + link)
-#    xbmc.log(msg='[ex.ua.videos]' + 'GetHTM request =>>> ' + str(link), level=xbmc.LOGDEBUG)
+    xbmc.log(msg='[ex.ua.videos]' + 'GetHTM request =>>> ' + str(link), level=xbmc.LOGDEBUG)
     kodi_details = {}
-    soup = BeautifulSoup(html_page)
-    kodi_details['title'] = soup.head.find(name='meta', attrs={'name':"title"}).get('content')
+    soup = BeautifulSoup(html_page, 'html.parser')
+    kodi_details['title'] = soup.body.find(name='img', attrs={'align':'left'}).get('alt')
+#    kodi_details['title'] = soup.head.find(name='meta', attrs={'name':"title"}).get('content', 'NNNN')
+    # link on fanart
     kodi_details['trailer'] = re.findall('(.+?)\?.*',
-                                           soup.head.find(name='link', attrs={'rel':"image_src"}).get('href'))[0]
+                                         soup.body.find(name='img', attrs={'align':'left'}).get('src'))[0]
+
     for detail in DETAILS_ukr_ru:
         search_detail = soup.find(text=re.compile(DETAILS_ukr_ru[detail][0], re.UNICODE))
         if search_detail is not None:
