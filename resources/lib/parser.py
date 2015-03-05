@@ -51,11 +51,20 @@ def get_movie_list(category, page):
     page = str(page)
     html = GetHTML('http://www.ex.ua' + category + '&p=' + page)
     # <img src='http://fs64.www.ex.ua/show/151452178/151452178.jpg?200' width='137' height='200' border='0' alt='Танкістка / Дівчина-танк / Tank Girl (1995) HDTVRip Ukr/Eng'></a><p><a href='/86793599?r=82470'><b>Танкістка / Дівчина-танк / Tank Girl (1995) HDTVRip Ukr/Eng</b></a><br><a href='/user/Worms2012'>Worms2012</a>,&nbsp;<small>0:39, 14 февраля 2015</small>
-    # TODO: checking for last page
-    next_page_flag = True
     soup = BeautifulSoup(html)
-    original_id = soup.find(attrs={"name": "original_id"})["value"] # category id
+    if soup.find(attrs={"name": "original_id"}) is not None:
+        original_id = soup.find(attrs={"name": "original_id"})["value"] # category id
+    else:
+        original_id = 'NONE'
     #return re.compile('<img src=\'(.+?)\?.*?alt=\'(.+?)\'></a><p><a href=\'(.+?)\'>').findall(html), next_page_flag, original_id
+    # ------- alternative -------
+#   _result_n = []
+#        for img in soup.find_all('img', attrs = {'border' : "0", 'height' :"200"}):
+#            _result_n.append(img.parent['href'])
+    if soup.find('img', alt=u'вы находитесь на последней странице') is None:
+        next_page_flag = True
+    else:
+        next_page_flag = False
     return re.compile('</a><p><a href=\'(.+?)\'>').findall(html), next_page_flag, original_id
 
 
@@ -71,11 +80,15 @@ def get_search_list(original_id, search_request, page):
     html = GetHTML('http://www.ex.ua' +'/search?original_id=' + original_id + '&s=' + search_request + '&p=' + page)
     soup = BeautifulSoup(html)
     _result = []
-    for link in soup('a'):
-        if link.find('img', align="left") is not None:
-            _result.append((re.findall('(.+?)\?.*', link.img['src'])[0], link.img['alt'], link['href']))
-            #TODO: retur next_page_flag, if len of return 0 return False
-    next_page_flag = True
+    for img in soup.find_all('img', attrs = {"align":"left"}):
+        _result.append(img.parent['href'])
+#    for link in soup('a'):
+#        if link.find('img', align="left") is not None:
+#            _result.append((re.findall('(.+?)\?.*', link.img['src'])[0], link.img['alt'], link['href']))
+    if soup.find('img', alt=u'вы находитесь на последней странице') is None:
+        next_page_flag = True
+    else:
+        next_page_flag = False
     return _result , next_page_flag
 
 
@@ -87,6 +100,9 @@ def get_playlist(movie):
     html = GetHTML('http://www.ex.ua' + movie)
     # <a href='/playlist/85726671.m3u' rel='nofollow'><b>плей-лист</b></a>, <a href='/playlist/85726671.xspf' rel='nofollow'>.xspf</a></small></td>
     xspf_link = re.compile('</b></a>, <a href=\'(.+?)\' rel=\'nofollow\'>\.xspf').findall(html)
+    if not xspf_link:
+        xbmc.log(msg='[ex.ua.videos]' + 'there are no <xspf_link>', level=xbmc.LOGDEBUG)
+        return None
     html = GetHTML('http://www.ex.ua' + xspf_link[0])
     return re.compile('\t<title>(.+?)</title>\n\t<location>(.+?)</location>').findall(html)
 
@@ -102,39 +118,51 @@ DETAILS_ukr_ru = {
 
 
 def get_movie_info(link):
+    # not the best solution, but such infoLabels from xbmcgui.setInfo as 'trailer' and 'code' used for transfering
+    # fanart link information about played files on page or not
     html_page = GetHTML('http://www.ex.ua' + link)
     xbmc.log(msg='[ex.ua.videos]' + 'GetHTM request =>>> ' + str(link), level=xbmc.LOGDEBUG)
     kodi_details = {}
     soup = BeautifulSoup(html_page, 'html.parser')
+    # there is some strange behaviour if 'html.parser' missing
     kodi_details['title'] = soup.body.find(name='img', attrs={'align':'left'}).get('alt')
 #    kodi_details['title'] = soup.head.find(name='meta', attrs={'name':"title"}).get('content', 'NNNN')
-    # link on fanart
+    # 'trailer' used to save a link on fanart
     kodi_details['trailer'] = re.findall('(.+?)\?.*',
                                          soup.body.find(name='img', attrs={'align':'left'}).get('src'))[0]
-
-    for detail in DETAILS_ukr_ru:
-        search_detail = soup.find(text=re.compile(DETAILS_ukr_ru[detail][0], re.UNICODE))
-        if search_detail is not None:
-            detail_text = re.findall(DETAILS_ukr_ru[detail][1], search_detail, re.UNICODE)
-            if detail_text and len(detail_text[0]) > 2:
-                text = detail_text[0]
-            else:
-                next_ = search_detail.find_next(text=True)
-                if len(next_) < 2:
-                    next_ = search_detail.find_next(text=True).find_next(text=True)
-                detail_text = re.findall(DETAILS_ukr_ru[detail][2], next_, re.UNICODE)
-                if detail_text:
+    xspf = soup.body.find(name='a', attrs={'rel' : 'nofollow'}, text='.xspf')
+    file_list = soup.body.find(name='a', attrs={'rel' : 'nofollow'}, text=u'файл-лист')
+    play_list = soup.body.find(name='a', attrs={'rel' : 'nofollow'}, text=u'плей-лист')
+    if xspf is not None or file_list is not None or play_list is not None:
+        # playlist xspf not found on page
+        #kodi_details['code'] = soup.body.find(name='a', attrs={'rel' : 'nofollow'}, text='.xspf').get('href')
+        kodi_details['code'] = 'show_files_list'
+        for detail in DETAILS_ukr_ru:
+            search_detail = soup.find(text=re.compile(DETAILS_ukr_ru[detail][0], re.UNICODE))
+            if search_detail is not None:
+                detail_text = re.findall(DETAILS_ukr_ru[detail][1], search_detail, re.UNICODE)
+                if detail_text and len(detail_text[0]) > 2:
                     text = detail_text[0]
-                    if text[0] == ':':
-                        text = text.replace(':', '', 1)
                 else:
-                    text = None
-            if detail == 'cast':
-                kodi_details[detail] = (text,)
-#            if detail == 'year':
-#                kodi_details[detail] = int(text)
-            else:
-                kodi_details[detail] = text
+                    next_ = search_detail.find_next(text=True)
+                    if len(next_) < 2:
+                        next_ = search_detail.find_next(text=True).find_next(text=True)
+                    detail_text = re.findall(DETAILS_ukr_ru[detail][2], next_, re.UNICODE)
+                    if detail_text:
+                        text = detail_text[0]
+                        if text[0] == ':':
+                            text = text.replace(':', '', 1)
+                    else:
+                        text = None
+                if detail == 'cast':
+                    kodi_details[detail] = (text,)
+    #            if detail == 'year':
+    #                kodi_details[detail] = int(text)
+                else:
+                    kodi_details[detail] = text
+    else:
+#        kodi_details['code'] = None
+        kodi_details['code'] = 'show_movies_2'
 #    xbmc.log(msg='[ex.ua.videos]' + '<kodi_details> =' + str(kodi_details), level=xbmc.LOGDEBUG)
     return kodi_details
 

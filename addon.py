@@ -81,9 +81,10 @@ def show_categories():
 
     return plugin.finish(categories_list)
 
-
+@plugin.route('/movies_list/<category>/category_name/<category_name>',
+              name = 'show_movies_2', options = {'page' : '0'})
 @plugin.route('/movies_list/<category>/category_name/<category_name>/page/<page>')
-def show_movies(category, category_name, page):
+def show_movies(category_name, page, category= None, movie = None):
     page = int(page)
     movies, next_page, original_id = get_movie_list(category, page)
     movies_info = [get_movie_info_api(cache_flag, link) for link in movies]
@@ -94,7 +95,10 @@ def show_movies(category, category_name, page):
                     'thumbnail': movies_info[i].get('trailer'),
                     'info': movies_info[i],
                     'properties': {'fanart_image': movies_info[i].get('trailer')},
-                    'path': plugin.url_for('show_files_list', movie=movies[i],
+                    'path': plugin.url_for(movies_info[i].get('code'),
+                                           movie=movies[i], # for show_files_list function
+                                           category = movies[i], # for show_movies function
+                                            # in case movies_info[i].get('code') == 'show_movies_2'
                                            thumbnail_link = movies_info[i].get('trailer'), category_name = category_name)}
                    for i in range(len(movies)) ]
     xbmc.log(msg='[ex.ua.videos]' + '<movies_list> = ' + str(movies_list), level=xbmc.LOGDEBUG)
@@ -104,7 +108,11 @@ def show_movies(category, category_name, page):
                                       'path': plugin.url_for('show_movies', category= category, page=str(page + 1),
                                       category_name = category_name)})
     if page > 0:
-        movies_list.insert(-1, {'label': '<< ' + previous_page,
+        if next_page:
+            prev_page_link_posision = -1
+        else:
+            prev_page_link_posision = list_len
+        movies_list.insert(prev_page_link_posision, {'label': '<< ' + previous_page,
                                         'path': plugin.url_for('back')})
     movies_list.insert(0, {'label': search_in + ' '+ urllib.unquote_plus(category_name).decode('utf-8') + ' [.....]',
                            'path' : plugin.url_for('start_search_in', category= category, original_id = original_id,
@@ -127,18 +135,23 @@ def show_search_list_in(category, category_name, page, original_id, start_search
         search_request = plugin.keyboard()
         if search_request is not None:
             movies, next_page = get_search_list(original_id, search_request, page)
+            movies_info = [get_movie_info_api(cache_flag, link) for link in movies]
         else:
             return
     else:
         search_request = urllib.unquote_plus(search_request)
         movies, next_page = get_search_list(original_id, search_request, page)
-    movies_list = [{'label':movie_title,
-                    'thumbnail': thumbnail,
-                    'info': get_movie_info_api(cache_flag, link),
-                    'properties': {'fanart_image': thumbnail},
-                    'path': plugin.url_for('show_files_list', movie=link,
-                                           thumbnail_link = thumbnail, category_name = category_name)}
-                   for thumbnail, movie_title, link in movies ]
+        movies_info = [get_movie_info_api(cache_flag, link) for link in movies]
+    movies_list = [{'label':movies_info[i].get('title'),
+                    'thumbnail': movies_info[i].get('trailer'),
+                    'info': movies_info[i],
+                    'properties': {'fanart_image': movies_info[i].get('trailer')},
+                    'path': plugin.url_for(movies_info[i].get('code'),
+                                           movie=movies[i],
+                                           category = movies[i],
+                                           thumbnail_link = movies_info[i].get('trailer'),
+                                           category_name = category_name)}
+                    for i in range(len(movies)) ]
     list_len = len(movies_list)
     if next_page:
         movies_list.insert(list_len, {'label': next_page_str + ' >>',
@@ -146,7 +159,11 @@ def show_search_list_in(category, category_name, page, original_id, start_search
                                       category_name = category_name, original_id = original_id,
                                       search_request = urllib.quote_plus(search_request))})
     if page > 0:
-        movies_list.insert(-1, {'label': '<< ' + previous_page,
+        if next_page:
+            prev_page_link_posision = -1
+        else:
+            prev_page_link_posision = list_len
+        movies_list.insert(prev_page_link_posision, {'label': '<< ' + previous_page,
                                         'path': plugin.url_for('back')})
 
 

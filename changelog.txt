@@ -1,3 +1,5 @@
+v0.2.0
+- mostly ready to use, lots of corrections done
 v0.1.4
 - "Enable auto scrolling for plot & review" activated from addon
 v0.1.3
