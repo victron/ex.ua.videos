@@ -20,7 +20,7 @@
 '''
 
 from xbmcswift2 import Plugin
-import urllib, bs4, os, sys, xbmc, xbmcplugin
+import urllib, bs4, os, sys, xbmc, xbmcplugin, time
 from multiprocessing import Pool
 #from resources.lib.parser import get_categories, get_movie_list, get_playlist, get_movie_info, get_search_list
 from resources.lib.parser import *
@@ -35,6 +35,7 @@ cache_ttl = plugin.get_setting('cache_TTL', int) * 60
 connect_timeout = float(plugin.get_setting('connect_timeout'))
 read_timeout = float(plugin.get_setting('read_timeout'))
 max_retries = plugin.get_setting('max_retries', int)
+pages_preload = plugin.get_setting('pages_preload', int)
 
 _addon_id = int(sys.argv[1])
 addon_path = plugin.addon.getAddonInfo('path').decode('utf-8')
@@ -118,7 +119,8 @@ def show_movies(category_name, page, category= None, movie = None):
                            'path' : plugin.url_for('start_search_in', category= category, original_id = original_id,
                                                    category_name = category_name)})
     xbmcplugin.setContent(_addon_id, 'movies')
-    return plugin.finish(movies_list, view_mode=504)
+    xbmc.log(msg='[ex.ua.videos]' + '<show_movies> finished ------------', level=xbmc.LOGDEBUG)
+    return plugin.finish(movies_list, view_mode=504) , preload_page(pages_preload, page + 1, category, next_page )
 
 
 @plugin.route('/back', name = 'back')
@@ -171,7 +173,9 @@ def show_search_list_in(category, category_name, page, original_id, start_search
                            'path' : plugin.url_for('start_search_in', category= category, original_id = original_id,
                                                    category_name = category_name)})
     xbmcplugin.setContent(_addon_id, 'movies')
-    return plugin.finish(movies_list, view_mode=504) #, update_listing=True)
+    xbmc.log(msg='[ex.ua.videos]' + '<test> =' + str(i), level=xbmc.LOGDEBUG)
+    return plugin.finish(movies_list, view_mode=504), \
+           preload_page_search(pages_preload, page + 1, original_id, search_request, next_page )
 
 
 @plugin.route('/files/<movie>/thumbnail/<thumbnail_link>/category_name/<category_name>')
@@ -198,6 +202,23 @@ def get_movie_info_cached(link):
     # transit function for plugin.cached decorator
     data = get_movie_info(link)
     return data
+
+
+def preload_page(page_number, start_page_number, category, next_page ):
+    if next_page:
+        for page in range(page_number):
+            movies, next_page, original_id = get_movie_list(category, start_page_number + page)
+            [get_movie_info_cached(link) for link in movies]
+            if not next_page:
+                break
+
+def preload_page_search(page_number, start_page_number, original_id, search_request, next_page ):
+    if next_page:
+        for page in range(page_number):
+            movies, next_page = get_search_list(original_id, search_request, start_page_number +page)
+            [get_movie_info_cached(link) for link in movies]
+            if not next_page:
+                break
 
 if __name__ == '__main__':
     plugin.run()

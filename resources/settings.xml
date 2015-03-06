@@ -5,8 +5,8 @@
         <setting label="30006" type="lsep"/>
         <setting label="30003" type="bool" id="cache_on_flag" default="true"/>
         <setting label="30004" type="slider" id="cache_TTL" default="24" range="0,4,48" option="int" enable="eq(-1,true)"/>
-<!--        <setting label="30005" type="slider" id="pages_preload" default="2" range="0,1,5" option="int" enable="eq(-2,true)" />
--->
+        <setting label="30005" type="slider" id="pages_preload" default="2" range="0,1,5" option="int" enable="eq(-2,true)" />
+
     </category>
     <category label="32020">
         <setting label="32023" type="slider" id="max_retries" default="2" range="0,5" option="int"/>

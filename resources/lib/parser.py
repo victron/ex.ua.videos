@@ -166,3 +166,4 @@ def get_movie_info(link):
 #    xbmc.log(msg='[ex.ua.videos]' + '<kodi_details> =' + str(kodi_details), level=xbmc.LOGDEBUG)
     return kodi_details
 
+
