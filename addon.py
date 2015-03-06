@@ -50,6 +50,10 @@ previous_page = addon.getLocalizedString(30025)
 search_in = addon.getLocalizedString(30021)
 search_everywhere = addon.getLocalizedString(30022)
 new_search_in = addon.getLocalizedString(30023)
+too_slow_connection = addon.getLocalizedString(32024)
+waited_too_long_between_bytes = addon.getLocalizedString(32025)
+get_an_HTTPError = addon.getLocalizedString(32026)
+not_expected_output = addon.getLocalizedString(32027)
 
 get_movie_info_api = lambda cache_flag, link : get_movie_info_cached(link) if cache_flag else get_movie_info(link)
 
@@ -89,9 +93,6 @@ def show_movies(category_name, page, category= None, movie = None):
     page = int(page)
     movies, next_page, original_id = get_movie_list(category, page)
     movies_info = [get_movie_info_api(cache_flag, link) for link in movies]
-    #Parallel Processing
-    #pool = Pool(4)
-    #movies_info = pool.map(lambda link: get_movie_info_api(cache_flag, link), movies)
     movies_list = [{'label': movies_info[i].get('title'),
                     'thumbnail': movies_info[i].get('trailer'),
                     'info': movies_info[i],
@@ -173,7 +174,6 @@ def show_search_list_in(category, category_name, page, original_id, start_search
                            'path' : plugin.url_for('start_search_in', category= category, original_id = original_id,
                                                    category_name = category_name)})
     xbmcplugin.setContent(_addon_id, 'movies')
-    xbmc.log(msg='[ex.ua.videos]' + '<test> =' + str(i), level=xbmc.LOGDEBUG)
     return plugin.finish(movies_list, view_mode=504), \
            preload_page_search(pages_preload, page + 1, original_id, search_request, next_page )
 
@@ -195,7 +195,7 @@ def show_files_list(movie, thumbnail_link, category_name):
     else:
         xbmc.executebuiltin("ActivateWindow(VideoPlaylist)")
 
-#===========================
+#=============== cache functions ============
 
 @plugin.cached(cache_ttl)
 def get_movie_info_cached(link):

@@ -4,7 +4,8 @@ __author__ = 'vic'
 import re, requests
 from bs4 import BeautifulSoup
 import xbmc, xbmcgui
-from addon import connect_timeout, read_timeout, max_retries
+from addon import connect_timeout, read_timeout, max_retries, too_slow_connection, waited_too_long_between_bytes,\
+    get_an_HTTPError, not_expected_output
 # get web page source
 dialog = xbmcgui.Dialog()
 
@@ -21,15 +22,17 @@ def GetHTML(url):
         #response = requests.get(url, timeout=(connect_timeout, read_timeout))
     except requests.exceptions.ConnectTimeout as e:
         xbmc.log(msg='[ex.ua.videos]' + 'Too slow connection', level=xbmc.LOGWARNING)
-        return dialog.notification('connection problem', 'Too slow connection', xbmcgui.NOTIFICATION_WARNING, 5000, True)
+        return dialog.notification('connection problem', too_slow_connection, xbmcgui.NOTIFICATION_WARNING, 5000, True)
     except requests.exceptions.ReadTimeout as e:
         xbmc.log(msg='[ex.ua.videos]' + 'Waited too long between bytes.', level=xbmc.LOGERROR)
-        return dialog.notification('connection problem', 'Waited too long between bytes', xbmcgui.NOTIFICATION_WARNING, 5000, True)
+        return dialog.notification('connection problem', waited_too_long_between_bytes,
+                                   xbmcgui.NOTIFICATION_WARNING, 5000, True)
     try:
         response.raise_for_status()
     except requests.exceptions.HTTPError as e:
         xbmc.log(msg='[ex.ua.videos]' + 'get an HTTPError: ' + e.message, level=xbmc.LOGERROR)
-        return dialog.notification('connection problem', 'HTTPError: ' + e.message, xbmcgui.NOTIFICATION_WARNING, 5000, True)
+        return dialog.notification('connection problem', get_an_HTTPError + e.message,
+                                   xbmcgui.NOTIFICATION_WARNING, 5000, True)
 #    response = requests.get(url)
     return response.text
 
@@ -43,11 +46,11 @@ def get_categories(lang='uk'):
         return result_list
     else:
         xbmc.log(msg='[ex.ua.videos]' + 'not expected output', level=xbmc.LOGWARNING)
-        return dialog.notification('Server output', 'not expected output', xbmcgui.NOTIFICATION_WARNING, 5000, True)
+        return dialog.notification('Server output', not_expected_output, xbmcgui.NOTIFICATION_WARNING, 5000, True)
 
 
 def get_movie_list(category, page):
-    """:returns [((thumbnail, movie_title, link), next_page_flag), ((.., .., ..),..)]"""
+    """:returns ( [link, .., ..], next_page_flag, original_id)"""
     page = str(page)
     html = GetHTML('http://www.ex.ua' + category + '&p=' + page)
     # <img src='http://fs64.www.ex.ua/show/151452178/151452178.jpg?200' width='137' height='200' border='0' alt='Танкістка / Дівчина-танк / Tank Girl (1995) HDTVRip Ukr/Eng'></a><p><a href='/86793599?r=82470'><b>Танкістка / Дівчина-танк / Tank Girl (1995) HDTVRip Ukr/Eng</b></a><br><a href='/user/Worms2012'>Worms2012</a>,&nbsp;<small>0:39, 14 февраля 2015</small>
@@ -56,7 +59,6 @@ def get_movie_list(category, page):
         original_id = soup.find(attrs={"name": "original_id"})["value"] # category id
     else:
         original_id = 'NONE'
-    #return re.compile('<img src=\'(.+?)\?.*?alt=\'(.+?)\'></a><p><a href=\'(.+?)\'>').findall(html), next_page_flag, original_id
     # ------- alternative -------
 #   _result_n = []
 #        for img in soup.find_all('img', attrs = {'border' : "0", 'height' :"200"}):
@@ -74,7 +76,7 @@ def get_search_list(original_id, search_request, page):
     :param original_id: string
     :param search_request: string
     :param page: integer; number of page
-    :return: ((thumbnail, movie_title, link), (..,..,..),next_page_flag)
+    :return: ([link, .., ..], next_page_flag)
     """
     page = str(page)
     html = GetHTML('http://www.ex.ua' +'/search?original_id=' + original_id + '&s=' + search_request + '&p=' + page)
@@ -118,8 +120,13 @@ DETAILS_ukr_ru = {
 
 
 def get_movie_info(link):
+    """
     # not the best solution, but such infoLabels from xbmcgui.setInfo as 'trailer' and 'code' used for transfering
     # fanart link information about played files on page or not
+    :param link: to movie page
+    :return: {'title' : <..>, 'trailer' : <..>, 'code' : <..>, 'year': <..>, 'genre': <..>, 'director': <..>,
+                'duration': <..>, 'plot': <..>, 'cast': <..>}
+    """
     html_page = GetHTML('http://www.ex.ua' + link)
     xbmc.log(msg='[ex.ua.videos]' + 'GetHTM request =>>> ' + str(link), level=xbmc.LOGDEBUG)
     kodi_details = {}
@@ -161,9 +168,7 @@ def get_movie_info(link):
                 else:
                     kodi_details[detail] = text
     else:
-#        kodi_details['code'] = None
         kodi_details['code'] = 'show_movies_2'
-#    xbmc.log(msg='[ex.ua.videos]' + '<kodi_details> =' + str(kodi_details), level=xbmc.LOGDEBUG)
     return kodi_details
 
 

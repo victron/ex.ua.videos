@@ -95,3 +95,19 @@ msgstr ""
 msgctxt "#32023"
 msgid "Max retries"
 msgstr ""
+
+msgctxt "#32024"
+msgid "Too slow connection"
+msgstr ""
+
+msgctxt "#32025"
+msgid "Waited too long between bytes."
+msgstr ""
+
+msgctxt "#32026"
+msgid "get an HTTPError: "
+msgstr ""
+
+msgctxt "#32027"
+msgid "not expected output"
+msgstr ""
