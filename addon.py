@@ -116,7 +116,9 @@ def show_movies(category_name, page, category= None, movie = None):
             prev_page_link_posision = list_len
         movies_list.insert(prev_page_link_posision, {'label': '<< ' + previous_page,
                                         'path': plugin.url_for('back')})
-    movies_list.insert(0, {'label': search_in + ' '+ urllib.unquote_plus(category_name).decode('utf-8') + ' [.....]',
+    movies_list.insert(0, {'label': '[COLOR red]' +
+                                    search_in + ' '+ urllib.unquote_plus(category_name).decode('utf-8') + ' [.....]' +
+                                    '[/COLOR]',
                            'path' : plugin.url_for('start_search_in', category= category, original_id = original_id,
                                                    category_name = category_name)})
     xbmcplugin.setContent(_addon_id, 'movies')
