@@ -103,7 +103,7 @@ def show_movies(category_name, page, category= None, movie = None):
                                             # in case movies_info[i].get('code') == 'show_movies_2'
                                            thumbnail_link = movies_info[i].get('trailer'), category_name = category_name)}
                    for i in range(len(movies)) ]
-    xbmc.log(msg='[ex.ua.videos]' + '<movies_list> = ' + str(movies_list), level=xbmc.LOGDEBUG)
+    #xbmc.log(msg='[ex.ua.videos]' + '<movies_list> = ' + str(movies_list), level=xbmc.LOGDEBUG)
     list_len = len(movies_list)
     if next_page:
         movies_list.insert(list_len, {'label': '[COLOR blue]' + next_page_str + ' >>' + '[/COLOR]',
@@ -121,8 +121,8 @@ def show_movies(category_name, page, category= None, movie = None):
                                     '[/COLOR]',
                            'path' : plugin.url_for('start_search_in', category= category, original_id = original_id,
                                                    category_name = category_name)})
-    xbmcplugin.setContent(_addon_id, 'movies')zzz
-    if xbmc.Monitor.onSettingsChanged():
+    xbmcplugin.setContent(_addon_id, 'movies')
+    if xbmc.Monitor().onSettingsChanged():
         xbmc.log(msg='[ex.ua.videos]' + '------ SettingsChanged --------', level=xbmc.LOGDEBUG)
 
     xbmc.log(msg='[ex.ua.videos]' + '<show_movies> finished ------------', level=xbmc.LOGDEBUG)
