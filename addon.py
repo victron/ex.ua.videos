@@ -19,7 +19,7 @@
     along with Ex.Ua.videos.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from xbmcswift2 import Plugin
+from xbmcswift2 import Plugin, actions
 import urllib, bs4, os, sys, xbmc, xbmcplugin, time
 from multiprocessing import Pool
 #from resources.lib.parser import get_categories, get_movie_list, get_playlist, get_movie_info, get_search_list
@@ -121,7 +121,10 @@ def show_movies(category_name, page, category= None, movie = None):
                                     '[/COLOR]',
                            'path' : plugin.url_for('start_search_in', category= category, original_id = original_id,
                                                    category_name = category_name)})
-    xbmcplugin.setContent(_addon_id, 'movies')
+    xbmcplugin.setContent(_addon_id, 'movies')zzz
+    if xbmc.Monitor.onSettingsChanged():
+        xbmc.log(msg='[ex.ua.videos]' + '------ SettingsChanged --------', level=xbmc.LOGDEBUG)
+
     xbmc.log(msg='[ex.ua.videos]' + '<show_movies> finished ------------', level=xbmc.LOGDEBUG)
     return plugin.finish(movies_list, view_mode=504) , preload_page(pages_preload, page + 1, category, next_page )
 
@@ -221,6 +224,20 @@ def preload_page_search(page_number, start_page_number, original_id, search_requ
             [get_movie_info_cached(link) for link in movies]
             if not next_page:
                 break
+
+# TODO:
+"""
+class LazyMonitor(xbmc.Monitor):
+
+    def __init__(self, *args, **kwargs):
+        xbmc.Monitor.__init__(self)
+        xbmc.log(msg='[ex.ua.videos]' + '------ init LazyMonitor --------', level=xbmc.LOGDEBUG)
+
+    def onSettingsChanged(self):
+        #update the settings
+        xbmc.log(msg='[ex.ua.videos]' + '------ SettingsChanged --------', level=xbmc.LOGDEBUG)
+        #actions.update_view('/')
+        """
 
 if __name__ == '__main__':
     plugin.run()
