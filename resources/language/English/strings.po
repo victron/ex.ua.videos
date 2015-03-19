@@ -21,7 +21,7 @@ msgid "main category"
 msgstr ""
 
 msgctxt "#30002"
-msgid "resources language"
+msgid "[COLOR blue]resources language[/COLOR]"
 msgstr ""
 
 msgctxt "#30003"
@@ -37,11 +37,11 @@ msgid "Pages to preload"
 msgstr ""
 
 msgctxt "#30006"
-msgid "Cache settings"
+msgid "[COLOR green]Cache settings[/COLOR]"
 msgstr ""
 
 msgctxt "#30007"
-msgid "Ukrainian"
+msgid "[COLOR yellow] Ukrainian [/COLOR]"
 msgstr ""
 
 msgctxt "#30008"
@@ -77,11 +77,11 @@ msgid "Previous Page"
 msgstr ""
 
 msgctxt "#32001"
-msgid "General"
+msgid "[COLOR yellow] General [/COLOR]"
 msgstr ""
 
 msgctxt "#32020"
-msgid "Connection"
+msgid "[COLOR blue]Connection[/COLOR]"
 msgstr ""
 
 msgctxt "#32021"

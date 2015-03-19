@@ -80,7 +80,7 @@ def show_categories():
                        # TODO: show first page, via multiple route
                        for category, link in categories ]
 #    plugin.add_sort_method('label')
-    categories_list.insert(0, {'label': search_everywhere + ' [.....]',
+    categories_list.insert(0, {'label': '[COLOR FF00FFFF]' + search_everywhere + ' [.....]' + '[/COLOR]',
                            'path' : plugin.url_for('start_search_in', category= 'everywhere', original_id = '0',
                                                    category_name = 'search everywhere')})
 
@@ -106,7 +106,7 @@ def show_movies(category_name, page, category= None, movie = None):
     xbmc.log(msg='[ex.ua.videos]' + '<movies_list> = ' + str(movies_list), level=xbmc.LOGDEBUG)
     list_len = len(movies_list)
     if next_page:
-        movies_list.insert(list_len, {'label': next_page_str + ' >>',
+        movies_list.insert(list_len, {'label': '[COLOR blue]' + next_page_str + ' >>' + '[/COLOR]',
                                       'path': plugin.url_for('show_movies', category= category, page=str(page + 1),
                                       category_name = category_name)})
     if page > 0:
@@ -114,9 +114,9 @@ def show_movies(category_name, page, category= None, movie = None):
             prev_page_link_posision = -1
         else:
             prev_page_link_posision = list_len
-        movies_list.insert(prev_page_link_posision, {'label': '<< ' + previous_page,
+        movies_list.insert(prev_page_link_posision, {'label': '[COLOR FFF0E68C]' + '<< ' + previous_page + '[/COLOR]',
                                         'path': plugin.url_for('back')})
-    movies_list.insert(0, {'label': '[COLOR red]' +
+    movies_list.insert(0, {'label': '[COLOR green]' +
                                     search_in + ' '+ urllib.unquote_plus(category_name).decode('utf-8') + ' [.....]' +
                                     '[/COLOR]',
                            'path' : plugin.url_for('start_search_in', category= category, original_id = original_id,
@@ -162,7 +162,7 @@ def show_search_list_in(category, category_name, page, original_id, start_search
                     for i in range(len(movies)) ]
     list_len = len(movies_list)
     if next_page:
-        movies_list.insert(list_len, {'label': next_page_str + ' >>',
+        movies_list.insert(list_len, {'label': '[COLOR FF00BFFF]' + next_page_str + ' >>' + '[/COLOR]',
                                       'path': plugin.url_for('show_search_list_in', category= category, page=str(page + 1),
                                       category_name = category_name, original_id = original_id,
                                       search_request = urllib.quote_plus(search_request))})
@@ -171,11 +171,13 @@ def show_search_list_in(category, category_name, page, original_id, start_search
             prev_page_link_posision = -1
         else:
             prev_page_link_posision = list_len
-        movies_list.insert(prev_page_link_posision, {'label': '<< ' + previous_page,
+        movies_list.insert(prev_page_link_posision, {'label': '[COLOR FFBDB76B]' + '<< ' + previous_page + '[/COLOR]',
                                         'path': plugin.url_for('back')})
 
 
-    movies_list.insert(0, {'label': new_search_in + ' '+ urllib.unquote_plus(category_name).decode('utf-8') + ' [.....]',
+    movies_list.insert(0, {'label': '[COLOR FF7FFFD4]' +
+                                    new_search_in + ' '+ urllib.unquote_plus(category_name).decode('utf-8') + ' [.....]'
+                                    + '[/COLOR]',
                            'path' : plugin.url_for('start_search_in', category= category, original_id = original_id,
                                                    category_name = category_name)})
     xbmcplugin.setContent(_addon_id, 'movies')
