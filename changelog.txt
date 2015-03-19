@@ -1,3 +1,5 @@
+v0.3.1
+- colors for control items
 v0.3.0
 - new feature "pages preload" (May be not so good for web server, but for user it looks like quick browsing)
 v0.2.0
